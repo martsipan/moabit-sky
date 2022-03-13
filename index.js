@@ -24,6 +24,7 @@ const options = parseArgs([
   { name: 'token', alias: 't', type: String },
   { name: 'chat', alias: 'c', type: String },
   { name: 'folder', alias: 'f', type: String, defaultValue: __dirname },
+  { name: 'timezone', alias: 'z', type: String, defaultValue: 'system' },
 ])
 
 if (!options.device) {
@@ -97,7 +98,7 @@ function createVideo(imagesPath, fileName) {
 }
 
 function takePicture() {
-  const date = DateTime.now()
+  const date = DateTime.local().setZone(options.timezone)
 
   // Define file name of image being taken
   const fileName = `${date.toFormat(FILE_DATE_FORMAT)}.jpg`
