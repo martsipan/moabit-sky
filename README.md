@@ -21,11 +21,11 @@ node index.js --device "USB Camera" --token "Telegram Token" --chat "Telegram Ch
 
 **Arguments**
 
-`--device` Name of camera device, for example `/dev/video0`. Leave empty to get a list of options
-`--token` API Token for Telegram Bot uploading video to channel
-`--chat` Identifier of the Telegram chat
-`--timezone` IANA Timezone name, for example `Europe/Berlin` (optional)
-`--folder` Path of folder where photos and images are stored (optional)
+* `--device` Name of camera device, for example `/dev/video0`. Leave empty to get a list of options
+* `--token` API Token for Telegram Bot uploading video to channel
+* `--chat` Identifier of the Telegram chat
+* `--timezone` IANA Timezone name, for example `Europe/Berlin` (optional)
+* `--folder` Path of folder where photos and images are stored (optional)
 
 ## License
 
