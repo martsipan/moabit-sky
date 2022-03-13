@@ -12,7 +12,7 @@ Take a picture every 5 minutes with a webcam, make an video out of the images ev
 
 ```bash
 npm install
-npm start
+npm start -- --device "USB Camera" --token "Telegram Token" --chat "Telegram Chat ID"
 ```
 
 ## License
