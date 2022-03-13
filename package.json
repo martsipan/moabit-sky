@@ -1,0 +1,21 @@
+{
+  "name": "moabit-sky",
+  "version": "1.0.0",
+  "description": "Moabit Sky Moabit Life",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "sky"
+  ],
+  "author": "Marta och Andreas",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "glob": "^7.2.0",
+    "luxon": "^2.3.1",
+    "node-webcam": "^0.8.0",
+    "request": "^2.88.2",
+    "videoshow": "^0.1.12"
+  }
+}
