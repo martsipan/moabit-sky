@@ -106,10 +106,10 @@ function takePicture() {
   }
 
   // Create folder if it does not exist yet
-  const folderExists = createFolder(`${PHOTOS_FOLDER_NAME}/${folderName}`);
+  const folderCreated = createFolder(`${PHOTOS_FOLDER_NAME}/${folderName}`);
 
   // Create a video at "video hour"
-  if (date.hour === VIDEO_HOUR && !folderExists) {
+  if (date.hour === VIDEO_HOUR && folderCreated) {
     const previousFolderName = date.toFormat(FOLDER_DATE_FORMAT);
     const videoFileName = `${date.toFormat(FOLDER_DATE_FORMAT)}.mp4`;
     createVideo(`${PHOTOS_FOLDER_NAME}/${previousFolderName}`, videoFileName);
