@@ -1,4 +1,6 @@
 const fs = require('fs')
+const process = require('process')
+const path = require('path')
 
 const glob = require('glob')
 const nodeWebcam = require('node-webcam')
@@ -21,20 +23,24 @@ const options = parseArgs([
   { name: 'device', alias: 'd', type: String },
   { name: 'token', alias: 't', type: String },
   { name: 'chat', alias: 'c', type: String },
+  { name: 'folder', alias: 'f', type: String, defaultValue: __dirname },
 ])
 
 if (!options.device) {
   nodeWebcam.create().list(function (list) {
     console.error(`Please select a camera device. Options are: ${list}`)
+    process.exit(1)
   })
-
-  return
 } else if (!options.token || !options.chat) {
   console.error('Telegram token and chat id missing')
-  return
+  process.exit(1)
 }
 
 const webcam = nodeWebcam.create({ device: options.device })
+
+function getPath(path) {
+  return path.join(options.folder, ...path);
+}
 
 function createFolder(path) {
   if (!fs.existsSync(path)) {
@@ -72,7 +78,7 @@ function createVideo(imagesPath, fileName) {
   }
 
   glob(`${imagesPath}/*.jpg`, {}, function (_, images) {
-    const videoPath = `${VIDEOS_FOLDER_NAME}/${fileName}`
+    const videoPath = getPath([VIDEOS_FOLDER_NAME, fileName])
 
     videoshow(images, {
       loop: VIDEO_FRAME_DURATION,
@@ -106,17 +112,17 @@ function takePicture() {
   }
 
   // Create folder if it does not exist yet
-  const folderCreated = createFolder(`${PHOTOS_FOLDER_NAME}/${folderName}`)
+  const folderCreated = createFolder(getPath([PHOTOS_FOLDER_NAME, folderName]))
 
   // Create a video at "video hour"
   if (date.hour === VIDEO_HOUR && folderCreated) {
     const previousFolderName = date.toFormat(FOLDER_DATE_FORMAT)
     const videoFileName = `${date.toFormat(FOLDER_DATE_FORMAT)}.mp4`
-    createVideo(`${PHOTOS_FOLDER_NAME}/${previousFolderName}`, videoFileName)
+    createVideo(getPath([PHOTOS_FOLDER_NAME, previousFolderName]), videoFileName)
   }
 
   webcam.capture(
-    `${PHOTOS_FOLDER_NAME}/${folderName}/${fileName}`,
+    getPath([PHOTOS_FOLDER_NAME, folderName, fileName]),
     function (err) {
       console.log(`Capture new photo: ${fileName} ...`)
 
@@ -129,8 +135,8 @@ function takePicture() {
   )
 }
 
-createFolder(PHOTOS_FOLDER_NAME)
-createFolder(VIDEOS_FOLDER_NAME)
+createFolder(getPath([PHOTOS_FOLDER_NAME]))
+createFolder(getPath([VIDEOS_FOLDER_NAME]))
 
 setInterval(function () {
   takePicture()
