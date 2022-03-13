@@ -1,6 +1,6 @@
 const fs = require('fs')
-const process = require('process')
-const path = require('path')
+const { exit } = require('process')
+const { join } = require('path')
 
 const glob = require('glob')
 const nodeWebcam = require('node-webcam')
@@ -29,17 +29,17 @@ const options = parseArgs([
 if (!options.device) {
   nodeWebcam.create().list(function (list) {
     console.error(`Please select a camera device. Options are: ${list}`)
-    process.exit(1)
+    exit(1)
   })
 } else if (!options.token || !options.chat) {
   console.error('Telegram token and chat id missing')
-  process.exit(1)
+  exit(1)
 }
 
 const webcam = nodeWebcam.create({ device: options.device })
 
 function getPath(path) {
-  return path.join(options.folder, ...path);
+  return join(options.folder, ...path);
 }
 
 function createFolder(path) {
