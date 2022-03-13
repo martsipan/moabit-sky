@@ -12,6 +12,7 @@
   "author": "Marta och Andreas",
   "license": "UNLICENSED",
   "dependencies": {
+    "command-line-args": "^5.2.1",
     "glob": "^7.2.0",
     "luxon": "^2.3.1",
     "node-webcam": "^0.8.0",

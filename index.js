@@ -5,6 +5,7 @@ const nodeWebcam = require('node-webcam')
 const { DateTime } = require('luxon')
 const videoshow = require('videoshow')
 const glob = require('glob')
+const parseArgs = require('command-line-args')
 
 const PHOTOS_FOLDER_NAME = 'photos'
 const VIDEOS_FOLDER_NAME = 'videos'
@@ -12,11 +13,27 @@ const FILE_DATE_FORMAT = 'yyyy-LL-dd-HH.mm'
 const FOLDER_DATE_FORMAT = 'yyyy-LL-dd-HH'
 const CAPTURE_FREQUENCY = 1000 * 60 * 1 // in ms
 const VIDEO_FRAME_DURATION = 0.5 // in sec
-const CAMERA_DEVICE = 'USB Camera'
-const TELEGRAM_TOKEN = ''
-const TELEGRAM_CHAT_ID = ''
 
-const webcam = nodeWebcam.create({ device: CAMERA_DEVICE })
+const options = parseArgs([
+  { name: 'device', alias: 'd', type: String },
+  { name: 'token', alias: 't', type: String },
+  { name: 'chat', alias: 'c', type: String },
+])
+
+const webcam = nodeWebcam.create()
+
+if (!options.device) {
+  webcam.list(function(list) {
+    console.error(`Please select a camera device. Options are: ${list}`)
+  })
+
+  return;
+}
+
+if (!options.token || !options.chat) {
+  console.error('Telegram token and chat id missing')
+  return;
+}
 
 function createFolder(path) {
   if (!fs.existsSync(path)) {
@@ -30,7 +47,7 @@ function createFolder(path) {
 function uploadToTelegram(filePath) {
   console.log(`Try uploading ${filePath} to Telegram channel ...`)
 
-  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`
+  const url = `https://api.telegram.org/bot${options.token}/sendDocument`
 
   const req = request(url, (err) => {
     if (err) {
@@ -41,7 +58,7 @@ function uploadToTelegram(filePath) {
   })
 
   const form = req.form()
-  form.append('chat_id', TELEGRAM_CHAT_ID)
+  form.append('chat_id', options.chat)
   form.append('document', fs.createReadStream(filePath))   
 }
 
@@ -84,12 +101,19 @@ function takePicture() {
     const videoFileName = `${date.toFormat(FOLDER_DATE_FORMAT)}.mp4`
     createVideo(`${PHOTOS_FOLDER_NAME}/${previousFolderName}`, videoFileName)
   }
+
+  const config = {
+    device: options.device,
+  }
   
-  webcam.capture(`${PHOTOS_FOLDER_NAME}/${folderName}/${fileName}`, function(err) {
+  webcam.capture(`${PHOTOS_FOLDER_NAME}/${folderName}/${fileName}`, config, function(err) {
     console.log(`Capture new photo: ${fileName} ...`)
+    
     if (err){
       console.log(`Something went wrong! ${err}`)
     }
+
+    webcam.clear()
   }) 
 }
 
