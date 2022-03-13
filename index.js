@@ -15,9 +15,7 @@ const FOLDER_DATE_FORMAT = "yyyy-LL-dd";
 
 const CAPTURE_FREQUENCY = 1000 * 60 * 5; // in ms
 const VIDEO_FRAME_DURATION = 0.25; // in sec
-const VIDEO_HOUR = 22; // Make a video at this time of the day (24 hours)
-
-const webcam = nodeWebcam.create();
+const VIDEO_HOUR = 22; // Make a video at this time of the day (0-23 hours)
 
 const options = parseArgs([
   { name: "device", alias: "d", type: String },
@@ -26,7 +24,7 @@ const options = parseArgs([
 ]);
 
 if (!options.device) {
-  webcam.list(function (list) {
+  nodeWebcam.create().list(function (list) {
     console.error(`Please select a camera device. Options are: ${list}`);
   });
 
@@ -35,6 +33,8 @@ if (!options.device) {
   console.error("Telegram token and chat id missing");
   return;
 }
+
+const webcam = nodeWebcam.create({ device: options.device });
 
 function createFolder(path) {
   if (!fs.existsSync(path)) {
@@ -115,13 +115,8 @@ function takePicture() {
     createVideo(`${PHOTOS_FOLDER_NAME}/${previousFolderName}`, videoFileName);
   }
 
-  const config = {
-    device: options.device,
-  };
-
   webcam.capture(
     `${PHOTOS_FOLDER_NAME}/${folderName}/${fileName}`,
-    config,
     function (err) {
       console.log(`Capture new photo: ${fileName} ...`);
 
