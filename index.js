@@ -81,6 +81,14 @@ function createVideo(imagesPath, fileName) {
 
   const process = exec(`ffmpeg -framerate ${options.framerate} -pattern_type glob -i '${imagesPath}/*.jpg' -c:v libx264 -pix_fmt yuv420p ${videoPath}`)
 
+  process.stdout.on('data', (data) => {
+    console.log(data);
+  });
+
+  process.stderr.on('data', (data) => {
+    console.log(data);
+  });
+
   process.on('close', (code) => {
     if (code === 0) {
       console.error('Saved video successfully')
