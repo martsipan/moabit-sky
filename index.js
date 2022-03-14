@@ -3,7 +3,6 @@ const { exit } = require('process')
 const { exec } = require('child_process')
 const { join } = require('path')
 
-const glob = require('glob')
 const nodeWebcam = require('node-webcam')
 const parseArgs = require('command-line-args')
 const request = require('request')
@@ -16,7 +15,6 @@ const FILE_DATE_FORMAT = 'yyyy-LL-dd_HH.mm'
 const FOLDER_DATE_FORMAT = 'yyyy-LL-dd'
 
 const CAPTURE_FREQUENCY = 1000 * 60 * 5 // in ms
-const VIDEO_FRAMERATE = 4 // frames per second
 const VIDEO_HOUR = 22 // Make a video at this time of the day (0-23 hours)
 
 const options = parseArgs([
@@ -25,6 +23,7 @@ const options = parseArgs([
   { name: 'chat', alias: 'c', type: String },
   { name: 'folder', alias: 'f', type: String, defaultValue: __dirname },
   { name: 'timezone', alias: 'z', type: String, defaultValue: 'system' },
+  { name: 'framerate', alias: 'r', type: Number, defaultValue: 4 },
 ])
 
 if (!options.device) {
@@ -80,7 +79,7 @@ function createVideo(imagesPath, fileName) {
 
   const videoPath = getPath([VIDEOS_FOLDER_NAME, fileName])
 
-  const process = exec(`ffmpeg -framerate ${VIDEO_FRAMERATE} -pattern_type glob -i '${imagesPath}/*.jpg' -c:v libx264 -pix_fmt yuv420p ${videoPath}`)
+  const process = exec(`ffmpeg -framerate ${options.framerate} -pattern_type glob -i '${imagesPath}/*.jpg' -c:v libx264 -pix_fmt yuv420p ${videoPath}`)
 
   process.on('close', (code) => {
     if (code === 0) {
