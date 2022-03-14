@@ -1,12 +1,12 @@
 const fs = require('fs')
 const { exit } = require('process')
+const { exec } = require('child_process')
 const { join } = require('path')
 
 const glob = require('glob')
 const nodeWebcam = require('node-webcam')
 const parseArgs = require('command-line-args')
 const request = require('request')
-const videoshow = require('videoshow')
 const { DateTime } = require('luxon')
 
 const PHOTOS_FOLDER_NAME = 'photos'
@@ -16,7 +16,7 @@ const FILE_DATE_FORMAT = 'yyyy-LL-dd_HH.mm'
 const FOLDER_DATE_FORMAT = 'yyyy-LL-dd'
 
 const CAPTURE_FREQUENCY = 1000 * 60 * 5 // in ms
-const VIDEO_FRAME_DURATION = 0.25 // in sec
+const VIDEO_FRAMERATE = 4 // frames per second
 const VIDEO_HOUR = 22 // Make a video at this time of the day (0-23 hours)
 
 const options = parseArgs([
@@ -40,7 +40,7 @@ if (!options.device) {
 const webcam = nodeWebcam.create({ device: options.device })
 
 function getPath(path) {
-  return join(options.folder, ...path);
+  return join(options.folder, ...path)
 }
 
 function createFolder(path) {
@@ -78,22 +78,17 @@ function createVideo(imagesPath, fileName) {
     return
   }
 
-  glob(`${imagesPath}/*.jpg`, {}, function (_, images) {
-    const videoPath = getPath([VIDEOS_FOLDER_NAME, fileName])
+  const videoPath = getPath([VIDEOS_FOLDER_NAME, fileName])
 
-    videoshow(images, {
-      loop: VIDEO_FRAME_DURATION,
-      transition: false,
-      audioChannels: 0,
-    })
-      .save(videoPath)
-      .on('error', function (err) {
-        console.error(`Something went wrong: ${err}`)
-      })
-      .on('end', function () {
-        console.error('Saved video successfully')
-        uploadToTelegram(videoPath)
-      })
+  const process = exec(`ffmpeg -framerate ${VIDEO_FRAMERATE} -pattern_type glob -i '${imagesPath}/*.jpg' -c:v libx264 -pix_fmt yuv420p ${videoPath}`)
+
+  process.on('close', (code) => {
+    if (code === 0) {
+      console.error('Saved video successfully')
+      uploadToTelegram(videoPath)
+    } else {
+      console.error('Saving video failed')
+    }
   })
 }
 
@@ -119,7 +114,10 @@ function takePicture() {
   if (date.hour === VIDEO_HOUR && folderCreated) {
     const previousFolderName = date.toFormat(FOLDER_DATE_FORMAT)
     const videoFileName = `${date.toFormat(FOLDER_DATE_FORMAT)}.mp4`
-    createVideo(getPath([PHOTOS_FOLDER_NAME, previousFolderName]), videoFileName)
+    createVideo(
+      getPath([PHOTOS_FOLDER_NAME, previousFolderName]),
+      videoFileName
+    )
   }
 
   webcam.capture(
