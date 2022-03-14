@@ -26,6 +26,7 @@ node index.js --device "USB Camera" --token "Telegram Token" --chat "Telegram Ch
 * `--chat` Identifier of the Telegram chat
 * `--timezone` IANA Timezone name, for example `Europe/Berlin` (optional)
 * `--folder` Path of folder where photos and images are stored (optional)
+* `--framerate` Frames per second in generated video (optional)
 
 ## License
 
